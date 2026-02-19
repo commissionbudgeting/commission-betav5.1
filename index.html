@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Commission Beta v5 — Bills + Deals + Calendar + Forecast</title>
+  <style>
+    :root{
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      --bg0:#0b1020;
+      --bg1:#101a3a;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.12);
+      --stroke: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted2: rgba(255,255,255,.60);
+      --shadow: 0 20px 55px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --good:#2aff9b;
+      --warn:#ffd166;
+      --bad:#ff4d6d;
+      --accent1:#7c3aed;
+      --accent2:#22d3ee;
+      --accent3:#fb7185;
+      --accent4:#fbbf24;
+    }
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(124,58,237,.45), transparent 60%),
+        radial-gradient(800px 500px at 85% 20%, rgba(34,211,238,.40), transparent 60%),
+        radial-gradient(900px 550px at 50% 90%, rgba(251,113,133,.35), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color: var(--text);
+    }
+    .wrap{ max-width: 1120px; margin: 0 auto; padding: 18px; }
+    .header{
+      border-radius: 22px;
+      padding: 16px 16px 14px;
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(34,211,238,.20));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: var(--shadow);
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+    }
+    .brandRow{ display:flex; gap: 12px; align-items:center; flex-wrap:wrap; }
+    .logo{
+      width: 40px; height: 40px; border-radius: 14px;
+      background: conic-gradient(from 210deg, var(--accent2), var(--accent1), var(--accent3), var(--accent2));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.20);
+      flex: 0 0 auto;
+    }
+    h1{ font-size: 18px; margin:0; letter-spacing:.2px; }
+    .sub{ margin:2px 0 0; font-size: 12px; color: var(--muted); line-height:1.35; max-width: 900px;}
+    .right{ margin-left:auto; }
+    .status{ font-size: 11px; color: var(--muted2); }
+
+    .tabs{ display:flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .tab{
+      padding: 10px 12px; border-radius: 999px; cursor:pointer;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      font-weight: 900; font-size: 12px;
+      transition: transform .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .tab:active{ transform: scale(.98); }
+    .tab.active{
+      background: linear-gradient(135deg, rgba(34,211,238,.30), rgba(124,58,237,.30));
+      border-color: rgba(255,255,255,.25);
+    }
+
+    .card{
+      margin-top: 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+    .cardPad{ padding: 16px; }
+    .grid{ display:grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 880px){ .grid{ grid-template-columns: 1fr 1fr; } }
+
+    .panel{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 12px;
+    }
+    .panelTitle{ font-weight: 950; margin-bottom: 6px; }
+    .muted{ color: var(--muted); font-size: 12px; line-height:1.35; }
+    .divider{ height:1px; background: rgba(255,255,255,.10); margin: 14px 0; }
+
+    .hidden{ display:none !important; }
+
+    label{ display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input, select{
+      width:100%; padding: 12px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-size: 15px; outline:none;
+    }
+    input:focus, select:focus{ border-color: rgba(34,211,238,.55); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+    input::placeholder{ color: rgba(255,255,255,.45); }
+
+    .row{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+    button{
+      padding: 12px 14px; border-radius: 14px; border: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,.90), rgba(34,211,238,.80));
+      color: #061018; font-weight: 950; cursor:pointer;
+      box-shadow: 0 14px 30px rgba(0,0,0,.35);
+      transition: transform .12s ease, filter .12s ease;
+    }
+    button:active{ transform: scale(.985); }
+    button.secondary{
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: none;
+    }
+    .iconBtn{
+      padding: 10px 12px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      font-weight: 950;
+      cursor:pointer;
+    }
+
+    .badge{
+      display:inline-flex; align-items:center; gap: 6px;
+      padding: 7px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 950;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .dot{ width: 8px; height:8px; border-radius: 999px; background: var(--accent2); display:inline-block; }
+    .dot.good{ background: var(--good); }
+    .dot.warn{ background: var(--warn); }
+    .dot.bad{ background: var(--bad); }
+
+    table{ width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td{ text-align:left; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,.10); vertical-align: top; }
+    th{ font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.70); }
+
+    /* KPI */
+    .kpi{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 880px){ .kpi{ grid-template-columns: repeat(4, 1fr); } }
+    .pill{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 12px;
+    }
+    .pill .t{ font-size: 11px; color: rgba(255,255,255,.70); margin-bottom: 6px; }
+    .pill .v{ font-size: 18px; font-weight: 980; letter-spacing: .2px; }
+    .pill .s{ font-size: 12px; color: rgba(255,255,255,.70); margin-top: 6px; line-height:1.25; }
+
+    /* Progress */
+    .bar{ height: 14px; border-radius: 999px; background: rgba(255,255,255,.10); overflow:hidden; border: 1px solid rgba(255,255,255,.14); }
+    .barFill{ height:100%; width:0%; border-radius:999px; background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(124,58,237,.95), rgba(251,113,133,.95)); transition: width .35s ease; }
+    .progressMeta{ margin-top: 8px; font-size: 12px; color: rgba(255,255,255,.78); line-height: 1.35; }
+
+    /* Rings */
+    .rings{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 880px){ .rings{ grid-template-columns: 1fr 1fr; } }
+    .ringCard{ display:flex; gap: 14px; align-items:center; }
+    .ring{
+      width: 92px; height: 92px; border-radius: 999px;
+      background: conic-gradient(rgba(34,211,238,.95) var(--p), rgba(255,255,255,.12) 0);
+      display:flex; align-items:center; justify-content:center;
+      border: 1px solid rgba(255,255,255,.16);
+      flex: 0 0 auto;
+    }
+    .ringInner{
+      width: 68px; height: 68px; border-radius: 999px;
+      background: rgba(0,0,0,.25);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction: column;
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(6px);
+    }
+    .ringPct{ font-weight: 980; font-size: 16px; }
+    .ringLbl{ font-size: 10px; color: rgba(255,255,255,.70); margin-top: 2px; }
+
+    /* Calendar */
+    .calHead{ display:flex; gap: 10px; align-items:center; flex-wrap:wrap; }
+    .calTitle{ font-weight: 980; font-size: 16px; }
+    .calGrid{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 12px; }
+    .dow{ font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.72); padding: 6px 2px; }
+    .dayCell{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      min-height: 98px;
+      padding: 8px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+    .dayNum{ font-weight: 980; font-size: 12px; }
+    .chip{
+      display:block; margin-top: 6px; padding: 6px 8px; border-radius: 12px;
+      font-size: 11px; border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+    }
+    .chip.bill{ background: rgba(251,191,36,.12); border-color: rgba(251,191,36,.28); }
+    .chip.deal{ background: rgba(34,211,238,.12); border-color: rgba(34,211,238,.28); }
+    .chip.pace{ background: rgba(124,58,237,.12); border-color: rgba(124,58,237,.28); }
+    .foot{ margin-top: 14px; font-size: 11px; color: rgba(255,255,255,.65); line-height:1.35; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="brandRow">
+        <div class="logo"></div>
+        <div>
+          <h1>Commission Beta v5</h1>
+          <div class="sub">Same “v4 app feel” + <b>forecasted income</b> for future months. Everything updates instantly when you add deals.</div>
+        </div>
+        <div class="right status" id="status"></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" id="tabBills">1) Bills</div>
+        <div class="tab" id="tabDeals">2) Deals</div>
+        <div class="tab" id="tabCalendar">3) Calendar</div>
+        <div class="tab" id="tabDash">4) Dashboard</div>
+        <div class="tab" id="tabForecast">5) Forecast</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardPad">
+
+        <!-- BILLS -->
+        <section id="billsSection">
+          <div class="grid">
+            <div class="panel">
+              <div class="panelTitle">Bills list</div>
+              <div class="muted">Add bills + due day. Bills repeat monthly on that due day.</div>
+              <div class="divider"></div>
+              <div class="grid">
+                <div>
+                  <label for="billName">Bill name</label>
+                  <input id="billName" placeholder="Rent" />
+                </div>
+                <div>
+                  <label for="billAmount">Amount ($)</label>
+                  <input inputmode="decimal" id="billAmount" placeholder="1800" />
+                </div>
+                <div>
+                  <label for="billDueDay">Due day (1–31)</label>
+                  <input inputmode="numeric" id="billDueDay" placeholder="1" />
+                </div>
+                <div class="panel">
+                  <div class="panelTitle">Totals</div>
+                  <div class="muted" id="billTotalsText">No bills yet.</div>
+                </div>
+              </div>
+              <div class="row" style="margin-top:12px;">
+                <button id="addBillBtn">+ Add bill</button>
+                <button class="secondary" id="clearBillsBtn">Clear bills</button>
+                <button class="secondary" id="copyBillsBtn">Copy bills</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panelTitle">Safe number</div>
+              <div class="muted">Safe number = Bills total + Savings goal (or Override). Forecast + calendar pace use your inputs on Dashboard.</div>
+              <div class="divider"></div>
+              <div class="row">
+                <span class="badge"><span class="dot" style="background:var(--accent2)"></span> Bills</span>
+                <span class="badge"><span class="dot" style="background:var(--accent1)"></span> + Savings</span>
+                <span class="badge"><span class="dot" style="background:var(--accent3)"></span> or Override</span>
+              </div>
+              <div class="divider"></div>
+              <div class="muted">Hosting on GitHub Pages is fine: your data still stays in the browser (localStorage).</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <table>
+            <thead><tr><th>Bill</th><th>Amount</th><th>Due day</th><th></th></tr></thead>
+            <tbody id="billsTbody"></tbody>
+          </table>
+        </section>
+
+        <!-- DEALS -->
+        <section id="dealsSection" class="hidden">
+          <div class="grid">
+            <div class="panel">
+              <div class="panelTitle">Log a deal</div>
+              <div class="muted">Enter date + payout (units defaults to 1). Progress uses projected income if possible.</div>
+              <div class="divider"></div>
+              <div class="grid">
+                <div>
+                  <label for="dealDate">Deal date</label>
+                  <input type="date" id="dealDate" />
+                </div>
+                <div>
+                  <label for="dealPayout">Deal payout ($)</label>
+                  <input inputmode="decimal" id="dealPayout" placeholder="600" />
+                </div>
+                <div>
+                  <label for="dealUnits">Units (usually 1)</label>
+                  <input inputmode="numeric" id="dealUnits" placeholder="1" />
+                </div>
+                <div class="panel">
+                  <div class="panelTitle">Safe progress</div>
+                  <div class="muted" id="safeProgressMeta">Add bills + savings goal on Dashboard.</div>
+                  <div class="divider"></div
